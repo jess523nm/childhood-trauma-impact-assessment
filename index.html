@@ -1,0 +1,670 @@
+/* ACES Assessment Skeleton
+   - Single page app using hash routes
+   - Local-only storage via localStorage
+*/
+
+const STORAGE_KEY = "aces_skeleton_v01";
+
+const CATEGORIES = [
+  { id: "cat1", n: 1, title: "Emotional / psychological abuse", note: "Verbal aggression, humiliation, threats, gaslighting, coercive control, scapegoating, autonomy suppression." },
+  { id: "cat2", n: 2, title: "Sexual abuse", note: "Unwanted sexual contact, coercion, exploitation, or exposure during childhood." },
+  { id: "cat3", n: 3, title: "Emotional neglect", note: "Chronic lack of emotional safety, attunement, protection, or care." },
+  { id: "cat4", n: 4, title: "Physical abuse", note: "Physical harm or threats of harm from a caregiver or household adult." },
+  { id: "cat5", n: 5, title: "Peer bullying", note: "Chronic peer aggression: humiliation, exclusion, threats, harassment, or assault from peers." },
+  { id: "cat6", n: 6, title: "Physical neglect", note: "Insufficient basic needs: food, supervision, hygiene, medical care, safety." },
+  { id: "cat7", n: 7, title: "Domestic violence exposure", note: "Witnessing violence, coercive control, or credible threats between adults." },
+  { id: "cat8", n: 8, title: "Loss / abandonment / incarceration", note: "Separation, abandonment, caregiver incarceration, or chronic fear of loss during childhood." },
+  { id: "cat9", n: 9, title: "Caregiver mental illness / suicidality", note: "Household caregiver mental illness, severe instability, or suicidal behaviors." },
+  { id: "cat10", n: 10, title: "Caregiver substance misuse", note: "Alcohol or drug misuse creating instability, danger, or chronic stress." },
+];
+
+const SUBCATEGORIES = {
+  // 1. Emotional/Psychological Abuse
+  cat1: [
+    { id: "cat1_sub1A", title: "1A: Verbal aggression", blurb: "Harsh tone, yelling, verbal hostility; escalation from dysregulated snapping to chronic verbal attack." },
+    { id: "cat1_sub1B", title: "1B: Shame-based abuse (degrading / humiliating)", blurb: "Mocking, ridicule, contempt, public humiliation, identity-shaming." },
+    { id: "cat1_sub1C", title: "1C: Terrorizing / threat-based control", blurb: "Fear conditioning via threats, intimidation, unpredictable rage, abandonment threats, or credible harm threats." },
+    { id: "cat1_sub1D", title: "1D: Exploitation / corruption", blurb: "Recruiting the child into adult agendas: loyalty coercion, secrecy, lying, moral pressure, instrumentalization." },
+    { id: "cat1_sub1E", title: "1E: Role reversal / emotional parentification", blurb: "Child becomes stabilizer/therapist/partner-like emotional support; adult leans on child instead of holding upward." },
+    { id: "cat1_sub1F", title: "1F: Isolation", blurb: "Restricting/sabotaging outside relationships to enforce dependency; undermining support access." },
+    { id: "cat1_sub1G", title: "1G: Gaslighting / cognitive manipulation", blurb: "Systematic distortion of reality/emotions/memory; blame reversal; chronic self-doubt and confusion." },
+    { id: "cat1_sub1H", title: "1H: Excessive control / intrusion", blurb: "Chronic over-control and privacy invasion that suppresses age-appropriate autonomy and agency." },
+    { id: "cat1_sub1I", title: "1I: Rejection / scapegoating", blurb: "Patterned positioning as unwanted/defective/the problem; identity-structural rejection." },
+    { id: "cat1_sub1J", title: "1J: Chronic conditional belonging", blurb: "Love, safety, or approval consistently tied to performance, loyalty, silence, or compliance in ways that shaped identity and self-worth." },
+  ],
+
+// 2. Sexual Abuse
+cat2: [
+  { id: "cat2_subA", title: "2A: Direct physical sexual contact", blurb: "Physical sexual contact directed toward the child or requiring participation, including falsely framed 'medical' contact." },
+  { id: "cat2_subB", title: "2B: Directed sexual behavior without direct contact", blurb: "Exposure to sexual material or direction to engage in sexualized behavior without direct physical assault." },
+  { id: "cat2_subC", title: "2C: Emotional incest / sexualized boundary violations", blurb: "Role reversal, romanticized framing, identity shaping, or sexualized relational dynamics without direct physical contact." },
+  { id: "cat2_subD", title: "2D: Privacy and bodily autonomy violations", blurb: "Coercive or humiliating intrusion into bodily privacy exceeding developmentally appropriate caregiving." },
+  { id: "cat2_subE", title: "2E: Image / recording-based exploitation", blurb: "Sexualized staging, image sharing, appearance regulation, or body-based identity exploitation." }
+],
+
+  // 3. Emotional Neglect
+  cat3: [
+    { id: "cat3_sub1", title: "Lack of emotional attunement", blurb: "No comfort, no protection, chronic emotional unavailability." },
+    { id: "cat3_sub2", title: "Lack of protection / advocacy", blurb: "Caregivers fail to protect, notice, or intervene when child is harmed." },
+  ],
+
+  // 4. Physical Abuse
+  cat4: [
+    { id: "cat4_sub1", title: "Direct physical harm", blurb: "Hitting, choking, burning, throwing objects, etc." },
+    { id: "cat4_sub2", title: "Threats or credible fear", blurb: "Fear of harm used as control, even if injuries were not frequent." },
+  ],
+
+  // 5. Peer Bullying
+  cat5: [
+    { id: "cat5_sub1", title: "Relational / social bullying", blurb: "Exclusion, rumor-spreading, humiliation, coercive group dynamics." },
+    { id: "cat5_sub2", title: "Harassment / threats / violence", blurb: "Threats, stalking, intimidation, harassment, assault, or repeated targeting." },
+  ],
+
+  // 6. Physical Neglect
+  cat6: [
+    { id: "cat6_sub1", title: "Basic needs unmet", blurb: "Food, hygiene, clothing, safe sleep, supervision." },
+    { id: "cat6_sub2", title: "Medical neglect", blurb: "Chronic refusal or failure to seek needed care." },
+  ],
+
+  // 7. Domestic Violence Exposure
+  cat7: [
+    { id: "cat7_sub1", title: "Witnessing violence", blurb: "Seeing or hearing physical violence or credible threats." },
+    { id: "cat7_sub2", title: "Coercive control environment", blurb: "Atmosphere of fear, stalking, surveillance, control between adults." },
+  ],
+
+  // 8. Loss / Abandonment / Incarceration
+  cat8: [
+    { id: "cat8_sub1", title: "Loss / separation / abandonment", blurb: "Caregiver leaves, disappears, repeated threats of leaving, or chronic fear of loss." },
+    { id: "cat8_sub2", title: "Caregiver incarceration impact", blurb: "Incarceration or repeated police involvement causing instability and loss." },
+  ],
+
+  // 9. Caregiver Mental Illness / Suicidality
+  cat9: [
+    { id: "cat9_sub1", title: "Severe mental illness environment", blurb: "Severe symptoms that impacted safety and stability." },
+    { id: "cat9_sub2", title: "Suicidality in household", blurb: "Attempts, threats, self-harm, crisis episodes." },
+  ],
+
+  // 10. Caregiver Substance Misuse
+  cat10: [
+    { id: "cat10_sub1", title: "Alcohol misuse environment", blurb: "Instability, danger, neglect linked to alcohol use." },
+    { id: "cat10_sub2", title: "Drug misuse environment", blurb: "Instability, danger, neglect linked to drug use." },
+  ],
+};
+
+function defaultState(){
+  return {
+    disclaimerAccepted: false,
+    selectedCategories: Object.fromEntries(CATEGORIES.map(c => [c.id, true])),
+    // Placeholder scores. Later these become your domain scoring arrays.
+    answers: {},
+    lastRoute: "#/readme",
+  };
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    const base = defaultState();
+    return {
+      ...base,
+      ...parsed,
+      selectedCategories: { ...base.selectedCategories, ...(parsed.selectedCategories || {}) },
+      answers: parsed.answers || {},
+    };
+  }catch{
+    return defaultState();
+  }
+}
+
+function saveState(patch){
+  const current = loadState();
+  const next = { ...current, ...patch };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  return next;
+}
+
+function hardReset(){
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+const el = {
+  routeView: document.getElementById("routeView"),
+  btnHome: document.getElementById("btnHome"),
+  btnRestart: document.getElementById("btnRestart"),
+
+  disclaimerBackdrop: document.getElementById("disclaimerBackdrop"),
+  disclaimerAgree: document.getElementById("disclaimerAgree"),
+  disclaimerAccept: document.getElementById("disclaimerAccept"),
+  disclaimerDecline: document.getElementById("disclaimerDecline"),
+
+  uncheckBackdrop: document.getElementById("uncheckBackdrop"),
+  uncheckDetail: document.getElementById("uncheckDetail"),
+  uncheckKeep: document.getElementById("uncheckKeep"),
+  uncheckRemove: document.getElementById("uncheckRemove"),
+};
+
+let pendingUncheck = null; // { catId, checkboxEl }
+
+function showDisclaimerIfNeeded(){
+  const state = loadState();
+  if(state.disclaimerAccepted) return;
+
+  el.disclaimerBackdrop.classList.remove("hidden");
+  el.disclaimerBackdrop.setAttribute("aria-hidden", "false");
+
+  el.disclaimerAgree.checked = false;
+  el.disclaimerAccept.disabled = true;
+}
+
+function hideDisclaimer(){
+  el.disclaimerBackdrop.classList.add("hidden");
+  el.disclaimerBackdrop.setAttribute("aria-hidden", "true");
+}
+
+function showUncheckModal(cat){
+  el.uncheckDetail.textContent = `Category ${cat.n}: ${cat.title}`;
+  el.uncheckBackdrop.classList.remove("hidden");
+  el.uncheckBackdrop.setAttribute("aria-hidden", "false");
+}
+
+function hideUncheckModal(){
+  el.uncheckBackdrop.classList.add("hidden");
+  el.uncheckBackdrop.setAttribute("aria-hidden", "true");
+  pendingUncheck = null;
+}
+
+function setRoute(hash){
+  window.location.hash = hash;
+}
+
+function route(){
+  const state = loadState();
+  const hash = window.location.hash || "#/readme";
+  saveState({ lastRoute: hash });
+
+  // Disclaimer gate: render route, but keep modal up until accepted
+  render(hash);
+  showDisclaimerIfNeeded();
+}
+
+function render(hash){
+  if(hash.startsWith("#/readme")) return renderReadme();
+  if(hash.startsWith("#/overview")) return renderOverview();
+  if(hash.startsWith("#/category/")) return renderCategory(hash);
+  if(hash.startsWith("#/summary/")) return renderSummary(hash);
+  if(hash.startsWith("#/results")) return renderResults();
+  if(hash.startsWith("#/final")) return renderFinal();
+
+  return renderNotFound();
+}
+
+/* ---------- Page 1: README ---------- */
+function renderReadme(){
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">README</h1>
+          <div class="muted">Rationale and layout overview</div>
+        </div>
+        <span class="pill">Dark theme</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p">
+        This is a prototype framework for a structured childhood adversity assessment.
+        The goal is to organize experiences into ten categories and then subcategories, with a summary per category.
+      </p>
+
+      <p class="p muted">
+        Replace this README text with your full rationale and approach.
+      </p>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div class="muted">When you are ready, begin the assessment flow.</div>
+        <button class="btn primary" id="beginBtn" type="button">Begin Assessment</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("beginBtn").addEventListener("click", () => setRoute("#/overview"));
+}
+
+/* ---------- Page 2: Category selection overview ---------- */
+function renderOverview(){
+  const state = loadState();
+
+  const itemsHtml = CATEGORIES.map(cat => {
+    const checked = state.selectedCategories[cat.id] ? "checked" : "";
+    return `
+      <label class="chk">
+        <input type="checkbox" data-cat="${cat.id}" ${checked} />
+        <span>
+          <b>${cat.n}. ${cat.title}</b><br/>
+          <span class="small">${cat.note}</span>
+        </span>
+      </label>
+    `;
+  }).join("");
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">Assessment layout overview</h1>
+
+      <p class="p muted">
+        Check any categories that might possibly apply. Categories 1–5 are strongly recommended for everyone due to nuance.
+      </p>
+
+      <div class="grid2">
+        <div class="callout info">
+          All categories start selected by default.
+          You can remove categories you are certain do not apply.
+        </div>
+        <div class="callout warning">
+          If you uncheck categories 1–5, you will see a reminder and must confirm removal.
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="checklist" id="catList">
+        ${itemsHtml}
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div class="muted">Continue to the first selected category.</div>
+        <button class="btn primary" id="continueBtn" type="button">Continue</button>
+      </div>
+    </section>
+  `;
+
+  // Checkbox behavior with modal for 1-5
+  document.querySelectorAll('input[type="checkbox"][data-cat]').forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      const catId = e.target.getAttribute("data-cat");
+      const cat = CATEGORIES.find(c => c.id === catId);
+      const isChecked = e.target.checked;
+
+      // If they are checking it, accept quietly
+      if(isChecked){
+        const nextSel = { ...loadState().selectedCategories, [catId]: true };
+        saveState({ selectedCategories: nextSel });
+        return;
+      }
+
+      // Unchecking
+      if(cat.n >= 1 && cat.n <= 5){
+        // Re-check visually for now until user confirms removal
+        e.target.checked = true;
+        pendingUncheck = { catId, checkboxEl: e.target };
+        showUncheckModal(cat);
+        return;
+      }
+
+      // Categories 6-10 can be unchecked without modal
+      const nextSel = { ...loadState().selectedCategories, [catId]: false };
+      saveState({ selectedCategories: nextSel });
+    });
+  });
+
+  document.getElementById("continueBtn").addEventListener("click", () => {
+    const st = loadState();
+    const first = CATEGORIES.find(c => st.selectedCategories[c.id]);
+    if(!first){
+      alert("At least one category must be selected to continue.");
+      return;
+    }
+    setRoute(`#/category/${first.id}`);
+  });
+}
+
+/* ---------- Category page skeleton ---------- */
+function renderCategory(hash){
+  const catId = hash.split("/")[2];
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const state = loadState();
+
+  if(!cat) return renderNotFound();
+
+  if(!state.selectedCategories[catId]){
+    const next = nextSelectedCategory(catId);
+    if(next) return setRoute(`#/category/${next.id}`);
+    return setRoute("#/results");
+  }
+
+  const subs = SUBCATEGORIES[catId] || [];
+  const subsHtml = subs.map(s => `
+    <label class="chk">
+      <input type="checkbox" data-sub="${s.id}" ${state.answers[s.id] ? "checked" : ""} />
+      <span>
+        <b>${s.title}</b><br/>
+        <span class="small">${s.blurb}</span>
+      </span>
+    </label>
+  `).join("");
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Category ${cat.n}</h1>
+          <div class="muted">${cat.title}</div>
+        </div>
+        <span class="pill">Subcategories</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p muted">
+        Placeholder: each subcategory will later become its own page with 10–20 items.
+        For now, these checkboxes are simple placeholders to wire the flow.
+      </p>
+
+      <div class="checklist" id="subList">
+        ${subsHtml || `<div class="muted">No subcategories defined yet.</div>`}
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backToOverview" type="button">Back to overview</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn secondary" id="toSummary" type="button">Category summary</button>
+          <button class="btn primary" id="nextBtn" type="button">Next</button>
+        </div>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backToOverview").addEventListener("click", () => setRoute("#/overview"));
+  document.getElementById("toSummary").addEventListener("click", () => setRoute(`#/summary/${catId}`));
+
+  document.querySelectorAll('input[type="checkbox"][data-sub]').forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      const subId = e.target.getAttribute("data-sub");
+      const checked = e.target.checked;
+      const st = loadState();
+      const nextAnswers = { ...st.answers, [subId]: checked };
+      saveState({ answers: nextAnswers });
+    });
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    const next = nextSelectedCategory(catId);
+    if(next) setRoute(`#/category/${next.id}`);
+    else setRoute("#/results");
+  });
+}
+
+/* ---------- Category summary skeleton ---------- */
+function renderSummary(hash){
+  const catId = hash.split("/")[2];
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const st = loadState();
+  if(!cat) return renderNotFound();
+
+  const subs = SUBCATEGORIES[catId] || [];
+  const checkedCount = subs.reduce((acc, s) => acc + (st.answers[s.id] ? 1 : 0), 0);
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">Category ${cat.n} summary</h1>
+      <div class="muted">${cat.title}</div>
+
+      <div class="hr"></div>
+
+      <div class="grid2">
+        <div class="callout info">
+          Placeholder summary.
+          Later this page will show severity/impact estimates, flags, and the item-level breakdown.
+        </div>
+        <div class="callout warning">
+          Temporary signal only:
+          <b>${checkedCount}</b> of <b>${subs.length}</b> subcategory placeholders selected.
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="nextBtn" type="button">Next</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => setRoute(`#/category/${catId}`));
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    const next = nextSelectedCategory(catId);
+    if(next) setRoute(`#/category/${next.id}`);
+    else setRoute("#/results");
+  });
+}
+
+/* ---------- Next-to-last page: Results placeholder ---------- */
+function renderResults(){
+  const st = loadState();
+  const selected = CATEGORIES.filter(c => st.selectedCategories[c.id]);
+
+  // Placeholder scoring: count checked subcategory placeholders within selected categories
+  const domainSignals = selected.map(cat => {
+    const subs = SUBCATEGORIES[cat.id] || [];
+    const count = subs.reduce((acc, s) => acc + (st.answers[s.id] ? 1 : 0), 0);
+    return { cat, count, total: subs.length };
+  });
+
+  const listHtml = domainSignals.map(d => `
+    <label class="chk">
+      <input type="checkbox" checked disabled />
+      <span>
+        <b>${d.cat.n}. ${d.cat.title}</b><br/>
+        <span class="small">Placeholder signal: ${d.count} of ${d.total} subcategory placeholders selected</span>
+      </span>
+    </label>
+  `).join("");
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">Assessment results and recommendations</h1>
+
+      <p class="p muted">
+        Placeholder: this page will later compute domain severity using 10–20 Likert-type items per domain,
+        then generate recommendations and resources.
+      </p>
+
+      <div class="hr"></div>
+
+      <div class="checklist">
+        ${listHtml || `<div class="muted">No categories selected.</div>`}
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="grid2">
+        <div class="callout info">
+          Recommendation skeleton:
+          <ul>
+            <li>Consider reviewing categories with any signal and discussing them with a licensed professional.</li>
+            <li>Use the category summaries as an index for deeper reflection.</li>
+            <li>Re-run later only if it feels safe to do so.</li>
+          </ul>
+        </div>
+        <div class="callout warning">
+          If you are in crisis or at risk of self-harm or harming others, call 911 (U.S.) or local emergency services.
+          U.S. crisis support: call or text 988.
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="finalBtn" type="button">Continue</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    const last = lastSelectedCategory();
+    if(last) setRoute(`#/summary/${last.id}`);
+    else setRoute("#/overview");
+  });
+  document.getElementById("finalBtn").addEventListener("click", () => setRoute("#/final"));
+}
+
+/* ---------- Final page ---------- */
+function renderFinal(){
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">How this compares, and what “healthy” means</h1>
+
+      <div class="hr"></div>
+
+      <p class="p">
+        Placeholder: later this page will show comparisons with average U.S. scores.
+      </p>
+
+      <div class="callout warning">
+        Important note: healthy scores should be near zero in all categories.
+        Being below an average does not mean an experience is acceptable or harmless.
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="copyLinkBtn" type="button">Share this assessment</button>
+        <a class="btn primary" id="feedbackBtn" href="#" role="button">Send feedback</a>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="muted">
+        Feedback button uses a mailto link. Replace the email address in app.js to your preferred address.
+      </div>
+    </section>
+  `;
+
+  // Share button: copy current URL
+  document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard.");
+    }catch{
+      alert("Could not copy automatically. You can manually copy the URL from your browser.");
+    }
+  });
+
+  // Feedback mailto
+  const email = "you@example.com"; // Change this
+  const subj = encodeURIComponent("ACES assessment feedback");
+  const body = encodeURIComponent("I have feedback or suggestions:\n\n");
+  const href = `mailto:${email}?subject=${subj}&body=${body}`;
+  const a = document.getElementById("feedbackBtn");
+  a.setAttribute("href", href);
+}
+
+/* ---------- Not found ---------- */
+function renderNotFound(){
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">Page not found</h1>
+      <p class="p muted">That route does not exist.</p>
+      <div class="hr"></div>
+      <button class="btn primary" id="goHome" type="button">Go to README</button>
+    </section>
+  `;
+  document.getElementById("goHome").addEventListener("click", () => setRoute("#/readme"));
+}
+
+/* ---------- Routing helpers ---------- */
+function nextSelectedCategory(currentCatId){
+  const st = loadState();
+  const idx = CATEGORIES.findIndex(c => c.id === currentCatId);
+  for(let i = idx + 1; i < CATEGORIES.length; i++){
+    const c = CATEGORIES[i];
+    if(st.selectedCategories[c.id]) return c;
+  }
+  return null;
+}
+
+function lastSelectedCategory(){
+  const st = loadState();
+  for(let i = CATEGORIES.length - 1; i >= 0; i--){
+    const c = CATEGORIES[i];
+    if(st.selectedCategories[c.id]) return c;
+  }
+  return null;
+}
+
+/* ---------- Top nav wiring ---------- */
+el.btnHome.addEventListener("click", () => setRoute("#/readme"));
+el.btnRestart.addEventListener("click", () => {
+  const ok = confirm("This will clear local selections and restart. Continue?");
+  if(!ok) return;
+  hardReset();
+  setRoute("#/readme");
+  route();
+});
+
+/* ---------- Disclaimer wiring ---------- */
+el.disclaimerAgree.addEventListener("change", () => {
+  el.disclaimerAccept.disabled = !el.disclaimerAgree.checked;
+});
+
+el.disclaimerAccept.addEventListener("click", () => {
+  saveState({ disclaimerAccepted: true });
+  hideDisclaimer();
+
+  // Restore last route if any
+  const st = loadState();
+  if(st.lastRoute) setRoute(st.lastRoute);
+});
+
+el.disclaimerDecline.addEventListener("click", () => {
+  // Minimal exit behavior: send to a blank-ish safe screen
+  el.routeView.innerHTML = `
+    <section class="card">
+      <h1 class="h1">Exit</h1>
+      <p class="p muted">
+        You chose not to continue. You can close this tab.
+      </p>
+    </section>
+  `;
+});
+
+/* ---------- Uncheck modal wiring ---------- */
+el.uncheckKeep.addEventListener("click", () => {
+  // Keep category checked
+  if(pendingUncheck){
+    const st = loadState();
+    const nextSel = { ...st.selectedCategories, [pendingUncheck.catId]: true };
+    saveState({ selectedCategories: nextSel });
+    if(pendingUncheck.checkboxEl) pendingUncheck.checkboxEl.checked = true;
+  }
+  hideUncheckModal();
+});
+
+el.uncheckRemove.addEventListener("click", () => {
+  // Remove category
+  if(pendingUncheck){
+    const st = loadState();
+    const nextSel = { ...st.selectedCategories, [pendingUncheck.catId]: false };
+    saveState({ selectedCategories: nextSel });
+    if(pendingUncheck.checkboxEl) pendingUncheck.checkboxEl.checked = false;
+  }
+  hideUncheckModal();
+});
+
+/* ---------- Init ---------- */
+window.addEventListener("hashchange", route);
+window.addEventListener("DOMContentLoaded", () => {
+  if(!window.location.hash) setRoute("#/readme");
+  route();
+});
