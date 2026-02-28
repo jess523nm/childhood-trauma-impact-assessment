@@ -5,111 +5,233 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Extended ACES Trauma Impact Assessment</title>
   <style>
-    :root{
-      --bg: #0b0f1a;
-      --card-bg: rgba(10, 12, 18, 0.72);
-      --card-border: rgba(255,255,255,0.14);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.72);
-      --btn: rgba(255,255,255,0.10);
-      --btn-hover: rgba(255,255,255,0.16);
-      --focus: rgba(255,255,255,0.25);
-    }
-    html, body { height:100%; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 10% 10%, rgba(120,160,255,0.18), transparent 60%),
-                  radial-gradient(900px 700px at 90% 20%, rgba(255,140,200,0.12), transparent 55%),
-                  var(--bg);
-      color: var(--text);
-    }
-    a{ color: inherit; }
-    .wrap{ max-width: 900px; margin: 0 auto; padding: 18px; }
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding: 10px 0 16px;
-    }
-    .brand{ font-weight: 700; letter-spacing: 0.2px; }
-    .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .btn{
-      border: 1px solid var(--card-border);
-      background: var(--btn);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 120ms ease;
-      font-weight: 600;
-    }
-    .btn:hover{ background: var(--btn-hover); }
-    .btn:focus{ outline: 2px solid var(--focus); outline-offset: 2px; }
-    .btn.primary{ background: rgba(120,160,255,0.22); }
-    .btn.primary:hover{ background: rgba(120,160,255,0.28); }
-    .btn.secondary{ background: rgba(255,255,255,0.08); }
+:root{
+  /* Background + surfaces */
+  --bg: #0b0f1a;
+  --card-bg: rgba(18, 22, 34, 0.82);
+  --card-border: rgba(255,255,255,0.14);
 
-    .card{
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-    }
-    .h1{ font-size: 22px; margin: 0; }
-    .muted{ color: var(--muted); }
-    .p{ line-height: 1.45; margin: 12px 0; }
-    .hr{ height:1px; background: var(--card-border); margin: 14px 0; }
-    .pill{
-      border: 1px solid var(--card-border);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 720px){ .grid2{ grid-template-columns: 1fr; } }
+  /* Text */
+  --text: rgba(255,255,255,0.94);
+  --muted: rgba(255,255,255,0.74);
 
-    .callout{
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 12px;
-      background: rgba(255,255,255,0.06);
-    }
-    .callout.warning{ background: rgba(255,160,90,0.12); }
-    .callout.info{ background: rgba(120,160,255,0.12); }
+  /* Controls */
+  --btn: rgba(255,255,255,0.10);
+  --btn-hover: rgba(255,255,255,0.16);
+  --focus: rgba(160,190,255,0.55);
 
-    .checklist{ display:flex; flex-direction:column; gap: 10px; }
-    .chk{ display:flex; gap: 10px; align-items:flex-start; }
-    .chk input{ margin-top: 4px; transform: scale(1.15); }
-    .small{ font-size: 13px; color: var(--muted); }
+  /* Friendly accents */
+  --accent: rgba(160, 190, 255, 0.22);
+  --accent-strong: rgba(160, 190, 255, 0.30);
+  --warn: rgba(255,160,90,0.14);
 
-    /* Modals */
-    .backdrop{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6);
-      display:flex; align-items:center; justify-content:center;
-      padding: 18px;
-      z-index: 10;
-    }
-    .hidden{ display:none !important; }
-    .modal{
-      width: min(720px, 100%);
-      border: 1px solid var(--card-border);
-      background: rgba(12, 14, 22, 0.94);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 16px 50px rgba(0,0,0,0.5);
-    }
-    .modal h2{ margin:0; font-size: 18px; }
-    .modal .actions{ display:flex; gap: 10px; justify-content:flex-end; flex-wrap:wrap; margin-top: 12px; }
-    label.inline{ display:flex; gap:10px; align-items:flex-start; }
+  /* Layout */
+  --radius: 18px;
+  --space: 16px;
+}
+
+html, body { height:100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(1200px 800px at 10% 10%, rgba(140,180,255,0.18), transparent 60%),
+    radial-gradient(900px 700px at 90% 20%, rgba(255,170,220,0.10), transparent 55%),
+    radial-gradient(900px 700px at 50% 90%, rgba(120,255,210,0.06), transparent 60%),
+    var(--bg);
+  color: var(--text);
+}
+
+a{ color: inherit; }
+.wrap{ max-width: 940px; margin: 0 auto; padding: 22px; }
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 8px 0 18px;
+}
+
+.brand{
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.brand small{
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border: 1px solid var(--card-border);
+  background: var(--btn);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease;
+  font-weight: 700;
+}
+
+.btn:hover{ background: var(--btn-hover); }
+.btn:active{ transform: translateY(1px); }
+.btn:focus{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.btn.primary{ background: var(--accent); }
+.btn.primary:hover{ background: var(--accent-strong); }
+
+.btn.secondary{ background: rgba(255,255,255,0.08); }
+
+.card{
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.38);
+}
+
+.h1{
+  font-size: 22px;
+  margin: 0;
+  letter-spacing: 0.1px;
+}
+
+.muted{ color: var(--muted); }
+
+.p{
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
+.hr{
+  height:1px;
+  background: rgba(255,255,255,0.12);
+  margin: 16px 0;
+}
+
+.pill{
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+}
+
+.pill.soon{
+  border-color: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.78);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 720px){ .grid2{ grid-template-columns: 1fr; } }
+
+.callout{
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,0.06);
+}
+
+.callout.warning{ background: var(--warn); }
+.callout.info{ background: rgba(160,190,255,0.12); }
+
+.checklist{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.chk{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+}
+
+/* Locked / not-yet-available categories */
+.chk.locked{
+  opacity: 0.45;
+  filter: grayscale(0.25);
+}
+.chk.locked:hover{
+  background: rgba(255,255,255,0.03);
+}
+.chk.locked .btn{
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.chk input{
+  margin-top: 4px;
+  transform: scale(1.25);
+  accent-color: rgba(160,190,255,0.85);
+}
+
+.small{ font-size: 13px; color: var(--muted); }
+
+/* Modals */
+.backdrop{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.62);
+  display:flex; align-items:center; justify-content:center;
+  padding: 18px;
+  z-index: 10;
+}
+
+.hidden{ display:none !important; }
+
+.modal{
+  width: min(720px, 100%);
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(14, 18, 28, 0.96);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+}
+
+.modal h2{ margin:0; font-size: 18px; }
+
+.modal .actions{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+
+label.inline{ display:flex; gap:10px; align-items:flex-start; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">Extended ACES — Prototype</div>
+      <div class="brand">
+        Extended ACES — Prototype
+        <small>Local-only • one-page outline</small>
+      </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn secondary" id="btnHome" type="button">Home</button>
         <button class="btn secondary" id="btnRestart" type="button">Restart</button>
@@ -154,14 +276,27 @@
   </div>
 <script>
 /* =========================
-   One-page ACES prototype
-   - No routes
-   - Single index.html
-   - localStorage for "disclaimer accepted" + category selections
+   Extended ACES — One-page, multi-step flow
+   index.html only (no routes, no extra pages)
+
+   Flow:
+   1) Intro (Disclaimer modal pops up EVERY refresh)
+   2) Choice (select categories to complete)
+   3) Assessment (subcategories in order; category summary % + feedback)
+   4) Check-in gate + 18–23 questionnaire
+   5) Final report (total + category scores)
+
+   Notes on data:
+   - JS "vector" = Array
+   - We'll store results in arrays of objects for clarity
    ========================= */
 
-const STORAGE_KEY = "aces_onepage_v01";
+const STORAGE_KEY = "aces_onepage_progress_v01";
+// TEMP: categories that are currently enabled for users.
+// Everything else will be visible but disabled/greyed out.
+const ENABLED_CATEGORIES = new Set(["cat1"]);
 
+/* ---------- Data ---------- */
 const CATEGORIES = [
   { id: "cat1", n: 1, title: "Emotional / psychological abuse", note: "Verbal aggression, humiliation, threats, gaslighting, coercive control, scapegoating, autonomy suppression." },
   { id: "cat2", n: 2, title: "Sexual abuse", note: "Unwanted sexual contact, coercion, exploitation, or exposure during childhood." },
@@ -188,61 +323,63 @@ const SUBCATEGORIES = {
     { id: "cat1_sub1I", title: "1I: Rejection / scapegoating", blurb: "Patterned positioning as unwanted/defective/the problem; identity-structural rejection." },
     { id: "cat1_sub1J", title: "1J: Chronic conditional belonging", blurb: "Love, safety, or approval consistently tied to performance, loyalty, silence, or compliance in ways that shaped identity and self-worth." },
   ],
-
   cat2: [
     { id: "cat2_subA", title: "2A: Direct physical sexual contact", blurb: "Physical sexual contact directed toward the child or requiring participation, including falsely framed 'medical' contact." },
     { id: "cat2_subB", title: "2B: Directed sexual behavior without direct contact", blurb: "Exposure to sexual material or direction to engage in sexualized behavior without direct physical assault." },
     { id: "cat2_subC", title: "2C: Emotional incest / sexualized boundary violations", blurb: "Role reversal, romanticized framing, identity shaping, or sexualized relational dynamics without direct physical contact." },
     { id: "cat2_subD", title: "2D: Privacy and bodily autonomy violations", blurb: "Coercive or humiliating intrusion into bodily privacy exceeding developmentally appropriate caregiving." },
-    { id: "cat2_subE", title: "2E: Image / recording-based exploitation", blurb: "Sexualized staging, image sharing, appearance regulation, or body-based identity exploitation." }
+    { id: "cat2_subE", title: "2E: Image / recording-based exploitation", blurb: "Sexualized staging, image sharing, appearance regulation, or body-based identity exploitation." },
   ],
-
   cat3: [
     { id: "cat3_sub1", title: "Lack of emotional attunement", blurb: "No comfort, no protection, chronic emotional unavailability." },
     { id: "cat3_sub2", title: "Lack of protection / advocacy", blurb: "Caregivers fail to protect, notice, or intervene when child is harmed." },
   ],
-
   cat4: [
     { id: "cat4_sub1", title: "Direct physical harm", blurb: "Hitting, choking, burning, throwing objects, etc." },
     { id: "cat4_sub2", title: "Threats or credible fear", blurb: "Fear of harm used as control, even if injuries were not frequent." },
   ],
-
   cat5: [
     { id: "cat5_sub1", title: "Relational / social bullying", blurb: "Exclusion, rumor-spreading, humiliation, coercive group dynamics." },
     { id: "cat5_sub2", title: "Harassment / threats / violence", blurb: "Threats, stalking, intimidation, harassment, assault, or repeated targeting." },
   ],
-
   cat6: [
     { id: "cat6_sub1", title: "Basic needs unmet", blurb: "Food, hygiene, clothing, safe sleep, supervision." },
     { id: "cat6_sub2", title: "Medical neglect", blurb: "Chronic refusal or failure to seek needed care." },
   ],
-
   cat7: [
     { id: "cat7_sub1", title: "Witnessing violence", blurb: "Seeing or hearing physical violence or credible threats." },
     { id: "cat7_sub2", title: "Coercive control environment", blurb: "Atmosphere of fear, stalking, surveillance, control between adults." },
   ],
-
   cat8: [
     { id: "cat8_sub1", title: "Loss / separation / abandonment", blurb: "Caregiver leaves, disappears, repeated threats of leaving, or chronic fear of loss." },
     { id: "cat8_sub2", title: "Caregiver incarceration impact", blurb: "Incarceration or repeated police involvement causing instability and loss." },
   ],
-
   cat9: [
     { id: "cat9_sub1", title: "Severe mental illness environment", blurb: "Severe symptoms that impacted safety and stability." },
     { id: "cat9_sub2", title: "Suicidality in household", blurb: "Attempts, threats, self-harm, crisis episodes." },
   ],
-
   cat10: [
     { id: "cat10_sub1", title: "Alcohol misuse environment", blurb: "Instability, danger, neglect linked to alcohol use." },
     { id: "cat10_sub2", title: "Drug misuse environment", blurb: "Instability, danger, neglect linked to drug use." },
   ],
 };
 
+/* ---------- State ---------- */
 function defaultState(){
   return {
-    disclaimerAccepted: false,
+    screen: "intro", // intro | choice | assess | catSummary | checkin | final
     selectedCategories: Object.fromEntries(CATEGORIES.map(c => [c.id, true])),
-    selectedSubs: {}, // subcategory checkbox state
+    // assessment progress pointers
+    currentCatIndex: 0,
+    currentSubIndex: 0,
+    // subcategory scores: { [subId]: number }
+    subScores: {},
+    // category summary cache: [{catId, percent, raw, max}]
+    categoryScores: [],
+    // 18–23 check-in questionnaire
+    age1823: {
+      intrusive: null, avoidance: null, hyperarousal: null, depression: null, anxiety: null
+    }
   };
 }
 
@@ -256,7 +393,9 @@ function loadState(){
       ...base,
       ...parsed,
       selectedCategories: { ...base.selectedCategories, ...(parsed.selectedCategories || {}) },
-      selectedSubs: { ...(base.selectedSubs || {}), ...(parsed.selectedSubs || {}) },
+      subScores: parsed.subScores || {},
+      categoryScores: parsed.categoryScores || [],
+      age1823: { ...base.age1823, ...(parsed.age1823 || {}) }
     };
   }catch{
     return defaultState();
@@ -274,7 +413,7 @@ function hardReset(){
   localStorage.removeItem(STORAGE_KEY);
 }
 
-/* --------- Elements --------- */
+/* ---------- Elements ---------- */
 const el = {
   routeView: document.getElementById("routeView"),
   btnHome: document.getElementById("btnHome"),
@@ -291,133 +430,13 @@ const el = {
   uncheckRemove: document.getElementById("uncheckRemove"),
 };
 
-let pendingUncheck = null; // { catId, checkboxEl }
+let pendingUncheck = null;
 
-/* --------- UI: main one-page render --------- */
-function renderMain(){
-  const st = loadState();
-
-  const checklistHtml = CATEGORIES.map(cat => {
-    const checked = st.selectedCategories[cat.id] ? "checked" : "";
-    const subs = SUBCATEGORIES[cat.id] || [];
-    const subsHtml = subs.map(s => `
-      <label class="chk" style="padding-left: 18px;">
-        <input type="checkbox" data-sub="${s.id}" ${st.selectedSubs?.[s.id] ? "checked" : ""} />
-        <span>
-          <span class="small"><b>${s.title}</b> — ${s.blurb}</span>
-        </span>
-      </label>
-    `).join("");
-
-    return `
-      <div class="callout" style="padding: 12px;">
-        <label class="chk" style="margin:0;">
-          <input type="checkbox" data-cat="${cat.id}" ${checked} />
-          <span>
-            <b>${cat.n}. ${cat.title}</b><br/>
-            <span class="small">${cat.note}</span>
-          </span>
-        </label>
-
-        <details style="margin-top:10px;">
-          <summary class="small" style="cursor:pointer;">Show subcategories</summary>
-          <div class="checklist" style="margin-top:10px;">
-            ${subsHtml || `<div class="small muted">No subcategories defined yet.</div>`}
-          </div>
-        </details>
-      </div>
-    `;
-  }).join("");
-
-  el.routeView.innerHTML = `
-    <section class="card">
-      <div class="row">
-        <div>
-          <h1 class="h1">Extended ACES — Prototype</h1>
-          <div class="muted">Simple one-page outline (no routes)</div>
-        </div>
-        <span class="pill">Local-only</span>
-      </div>
-
-      <div class="hr"></div>
-
-      <p class="p">
-        This is a structured outline of categories and notes.
-        Later, each category can expand into subcategories and item lists — but for now we’re keeping it intentionally simple.
-      </p>
-
-      <div class="grid2">
-        <div class="callout info">
-          <b>How to use:</b><br/>
-          Leave checked anything that might apply. Uncheck only what you are sure does not apply.
-        </div>
-        <div class="callout warning">
-          <b>Note:</b><br/>
-          If you uncheck categories 1–5, you’ll be asked to confirm removal (because these often contain nuance).
-        </div>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="checklist" id="catList">
-        ${checklistHtml}
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="callout info">
-        <b>Next step (later):</b> This is where we’ll add subcategory expand/collapse panels, then the 10–20 Likert items.
-      </div>
-    </section>
-  `;
-
-  // Wire category checkbox behavior
-  document.querySelectorAll('input[type="checkbox"][data-cat]').forEach(cb => {
-    cb.addEventListener("change", (e) => {
-      const catId = e.target.getAttribute("data-cat");
-      const cat = CATEGORIES.find(c => c.id === catId);
-      const isChecked = e.target.checked;
-
-      // Checking it back on: save immediately
-      if(isChecked){
-        const st2 = loadState();
-        const nextSel = { ...st2.selectedCategories, [catId]: true };
-        saveState({ selectedCategories: nextSel });
-        return;
-      }
-
-      // Unchecking categories 1–5 -> confirm modal
-      if(cat.n >= 1 && cat.n <= 5){
-        e.target.checked = true; // revert until confirmed
-        pendingUncheck = { catId, checkboxEl: e.target };
-        showUncheckModal(cat);
-        return;
-      }
-
-      // Unchecking 6–10 -> save immediately
-      const st2 = loadState();
-      const nextSel = { ...st2.selectedCategories, [catId]: false };
-      saveState({ selectedCategories: nextSel });
-    });
-  });
-
-    // Wire subcategory checkbox behavior (simple save)
-  document.querySelectorAll('input[type="checkbox"][data-sub]').forEach(cb => {
-    cb.addEventListener("change", (e) => {
-      const subId = e.target.getAttribute("data-sub");
-      const isChecked = e.target.checked;
-      const st2 = loadState();
-      const nextSubs = { ...(st2.selectedSubs || {}), [subId]: isChecked };
-      saveState({ selectedSubs: nextSubs });
-    });
-  });
-}
-
-/* --------- Disclaimer modal --------- */
-function showDisclaimerIfNeeded(){
-  const st = loadState();
-  if(st.disclaimerAccepted) return;
-
+/* =========================================================
+   Disclaimer modal: must show on EVERY refresh
+   (so: no "accepted" persistence)
+   ========================================================= */
+function showDisclaimerEveryTime(){
   el.disclaimerBackdrop.classList.remove("hidden");
   el.disclaimerBackdrop.setAttribute("aria-hidden", "false");
   el.disclaimerAgree.checked = false;
@@ -429,45 +448,743 @@ function hideDisclaimer(){
   el.disclaimerBackdrop.setAttribute("aria-hidden", "true");
 }
 
-/* --------- Uncheck confirm modal --------- */
+/* ---------- Helpers ---------- */
+function getSelectedCatIds(st){
+  return CATEGORIES.filter(c => st.selectedCategories[c.id]).map(c => c.id);
+}
+
+function firstSelectedCatIndex(st){
+  const ids = getSelectedCatIds(st);
+  if(ids.length === 0) return 0;
+  const firstId = ids[0];
+  return CATEGORIES.findIndex(c => c.id === firstId);
+}
+
+function findNextSelectedCatIndex(fromIndex, st){
+  for(let i = fromIndex + 1; i < CATEGORIES.length; i++){
+    const cat = CATEGORIES[i];
+    if(st.selectedCategories[cat.id]) return i;
+  }
+  return -1;
+}
+
+function calcCategoryPercent(catId, st){
+  const subs = SUBCATEGORIES[catId] || [];
+  if(subs.length === 0) return { percent: 0, raw: 0, max: 0 };
+
+  const maxPerSub = 4; // slider 0–4 placeholder
+  const max = subs.length * maxPerSub;
+
+  let raw = 0;
+  subs.forEach(s => {
+    const v = st.subScores[s.id];
+    raw += (typeof v === "number" ? v : 0);
+  });
+
+  const percent = Math.round((raw / max) * 100);
+  return { percent, raw, max };
+}
+
+/* =========================================================
+   Screens
+   ========================================================= */
+function render(){
+  const st = loadState();
+  if(st.screen === "intro") return renderIntro();
+  if(st.screen === "choice") return renderChoice();
+  if(st.screen === "assess") return renderAssessment();
+  if(st.screen === "catSummary") return renderCategorySummary();
+  if(st.screen === "checkin") return renderCheckin();
+  if(st.screen === "final") return renderFinal();
+  return renderIntro();
+}
+
+/* ---------- 1) Intro screen ---------- */
+function renderIntro(){
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Extended ACES — Prototype</h1>
+          <div class="muted">Introduction</div>
+        </div>
+        <span class="pill">One-page</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p">
+        This tool organizes childhood adversity into 10 categories and subcategories.
+        It is designed for structured reflection and research-style tracking.
+      </p>
+
+      <div class="callout info">
+        <b>How it works:</b>
+        <ul style="margin:8px 0 0 18px;">
+          <li>You choose which categories you will complete.</li>
+          <li>If you choose a category, you complete <b>all</b> subcategories in that category, in order.</li>
+          <li>You’ll see a category summary after each category, then a final report at the end.</li>
+        </ul>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div class="muted">When you’re ready, start with category selection.</div>
+        <button class="btn primary" id="introBegin" type="button" disabled>Begin</button>
+      </div>
+
+      <p class="small" style="margin-top:10px;">
+        (The Disclaimer modal must be accepted before “Begin” activates.)
+      </p>
+    </section>
+  `;
+
+  // Enable Begin only after disclaimer accepted for this session.
+  // We keep it simple: the Accept button will flip a runtime flag.
+  const btn = document.getElementById("introBegin");
+  btn.disabled = !window.__disclaimerOk;
+  btn.addEventListener("click", () => {
+    saveState({ screen: "choice" });
+    render();
+  });
+}
+
+/* ---------- 2) Choice screen (category checkboxes) ---------- */
+function renderChoice(){
+  const st = loadState();
+  // Force disabled categories to false in state (so they can't be accidentally included)
+  let changed = false;
+  const nextSel = { ...st.selectedCategories };
+  CATEGORIES.forEach(cat => {
+    if(!ENABLED_CATEGORIES.has(cat.id) && nextSel[cat.id]){
+      nextSel[cat.id] = false;
+      changed = true;
+    }
+  });
+  if(changed){
+    saveState({ selectedCategories: nextSel });
+  }
+  const checklistHtml = CATEGORIES.map(cat => {
+    const isEnabled = ENABLED_CATEGORIES.has(cat.id);
+
+    // If disabled, force it unchecked in the UI (and in saved state below).
+    const checked = (isEnabled && st.selectedCategories[cat.id]) ? "checked" : "";
+    const disabledAttr = isEnabled ? "" : "disabled";
+    const lockedClass = isEnabled ? "" : " locked";
+    const soonPill = isEnabled ? "" : `<span class="pill soon">Coming soon</span>`;
+    const soonNote = isEnabled ? "" : `<div class="small muted" style="margin-top:6px;">(Disabled until this category is built.)</div>`;
+    const subs = SUBCATEGORIES[cat.id] || [];
+    const subsHtml = subs.length
+      ? subs.map(s => `
+          <div class="callout" style="padding:10px; margin-top:8px;">
+            <div><b>${s.title}</b></div>
+            <div class="small">${s.blurb}</div>
+          </div>
+        `).join("")
+      : `<div class="muted small" style="margin-top:8px;">No subcategories defined yet.</div>`;
+
+    return `
+      <div class="chk${lockedClass}" style="flex-direction:column; align-items:stretch;">
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <input type="checkbox" data-cat="${cat.id}" ${checked} ${disabledAttr} />
+          <div style="flex:1;">
+            <div><b>${cat.n}. ${cat.title}</b></div>
+            <div class="small">${cat.note}</div>
+            ${soonNote}
+          </div>
+          ${isEnabled ? `
+            <button class="btn secondary" type="button" data-toggle="${cat.id}">
+              Show subcategories
+            </button>
+          ` : `
+            ${soonPill}
+          `}
+        </div>
+
+        <div class="hidden" id="subs_${cat.id}" style="margin-left:34px; margin-top:10px;">
+          <div class="callout info">
+            <b>Rule:</b> If you complete this category, you will complete <b>all</b> subcategories in it (no picking and choosing).
+          </div>
+          ${subsHtml}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Choose categories to complete</h1>
+          <div class="muted">Step 2 of 5</div>
+        </div>
+        <span class="pill">Selection</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p muted">
+        Leave checked anything you plan to complete. Uncheck only what you are sure does not apply.
+      </p>
+
+      <div class="checklist" id="catList">
+        ${checklistHtml}
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backToIntro" type="button">Back</button>
+        <button class="btn primary" id="startAssessment" type="button">Start assessment</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backToIntro").addEventListener("click", () => {
+    saveState({ screen: "intro" });
+    render();
+  });
+
+  // Checkbox behavior with modal for 1–5
+  document.querySelectorAll('input[type="checkbox"][data-cat]').forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      const catId = e.target.getAttribute("data-cat");
+      const cat = CATEGORIES.find(c => c.id === catId);
+      const isChecked = e.target.checked;
+
+      if(isChecked){
+        const st2 = loadState();
+        saveState({ selectedCategories: { ...st2.selectedCategories, [catId]: true } });
+        return;
+      }
+
+      if(cat.n >= 1 && cat.n <= 5){
+        e.target.checked = true; // revert until confirmed
+        pendingUncheck = { catId, checkboxEl: e.target };
+        showUncheckModal(cat);
+        return;
+      }
+
+      const st2 = loadState();
+      saveState({ selectedCategories: { ...st2.selectedCategories, [catId]: false } });
+    });
+  });
+
+  // Toggle subcategories panels
+  document.querySelectorAll('button[data-toggle]').forEach(btn => {
+    btn.addEventListener("click", () => {
+      const catId = btn.getAttribute("data-toggle");
+      const panel = document.getElementById(`subs_${catId}`);
+      if(!panel) return;
+      const isHidden = panel.classList.contains("hidden");
+      panel.classList.toggle("hidden");
+      btn.textContent = isHidden ? "Hide subcategories" : "Show subcategories";
+    });
+  });
+
+  // Start assessment button
+  document.getElementById("startAssessment").addEventListener("click", () => {
+    const st2 = loadState();
+    const selectedIds = getSelectedCatIds(st2);
+    if(selectedIds.length === 0){
+      alert("Please select at least one category to continue.");
+      return;
+    }
+
+    // Reset progress pointers to first selected category
+    const idx = firstSelectedCatIndex(st2);
+    saveState({
+      screen: "assess",
+      currentCatIndex: idx,
+      currentSubIndex: 0,
+      categoryScores: [],
+      subScores: {},
+      age1823: defaultState().age1823
+    });
+    render();
+  });
+}
+
+/* ---------- 3) Assessment screen (subcategory-by-subcategory) ---------- */
+function renderAssessment(){
+  const st = loadState();
+  const cat = CATEGORIES[st.currentCatIndex];
+  if(!cat || !st.selectedCategories[cat.id]){
+    // Safety: jump to next selected
+    const nextIdx = findNextSelectedCatIndex(st.currentCatIndex, st);
+    if(nextIdx === -1){
+      saveState({ screen: "checkin" });
+      return render();
+    }
+    saveState({ currentCatIndex: nextIdx, currentSubIndex: 0 });
+    return render();
+  }
+
+  const subs = SUBCATEGORIES[cat.id] || [];
+  const sub = subs[st.currentSubIndex];
+
+  // If a category has no subs yet, treat it as done (for now)
+  if(subs.length === 0){
+    saveState({ screen: "catSummary" });
+    return render();
+  }
+
+  const currentVal = (typeof st.subScores[sub.id] === "number") ? st.subScores[sub.id] : 0;
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Category ${cat.n}: ${cat.title}</h1>
+          <div class="muted">Subcategory ${st.currentSubIndex + 1} of ${subs.length}</div>
+        </div>
+        <span class="pill">Assessment</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="callout info">
+        <b>${sub.title}</b><br/>
+        <span class="small">${sub.blurb}</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p muted">
+        Placeholder scoring (temporary): choose an impact level for this subcategory.
+        (We’ll replace this with your full 10–20 Likert items later.)
+      </p>
+
+      <div class="callout" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="row" style="align-items:center;">
+          <div><b>Impact score:</b> <span class="muted">(0–4)</span></div>
+          <div class="pill" id="scorePill">${currentVal}</div>
+        </div>
+        <input id="impactSlider" type="range" min="0" max="4" step="1" value="${currentVal}" />
+        <div class="small muted">
+          0 = none • 1 = mild • 2 = moderate • 3 = high • 4 = extreme
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="nextBtn" type="button">Next</button>
+      </div>
+    </section>
+  `;
+
+  const pill = document.getElementById("scorePill");
+  const slider = document.getElementById("impactSlider");
+
+  slider.addEventListener("input", () => {
+    pill.textContent = slider.value;
+  });
+
+  function persistCurrent(){
+    const st2 = loadState();
+    const v = Number(slider.value);
+    saveState({ subScores: { ...st2.subScores, [sub.id]: v } });
+  }
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    persistCurrent();
+    const st2 = loadState();
+
+    // Back within category
+    if(st2.currentSubIndex > 0){
+      saveState({ currentSubIndex: st2.currentSubIndex - 1 });
+      return render();
+    }
+
+    // Back to Choice page if first sub of first selected category
+    saveState({ screen: "choice" });
+    render();
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    persistCurrent();
+    const st2 = loadState();
+
+    // Next within category
+    if(st2.currentSubIndex < subs.length - 1){
+      saveState({ currentSubIndex: st2.currentSubIndex + 1 });
+      return render();
+    }
+
+    // End of category -> category summary screen
+    saveState({ screen: "catSummary" });
+    render();
+  });
+}
+
+/* ---------- Category Summary screen (after each category) ---------- */
+function renderCategorySummary(){
+  const st = loadState();
+  const cat = CATEGORIES[st.currentCatIndex];
+  if(!cat){
+    saveState({ screen: "checkin" });
+    return render();
+  }
+
+  const { percent, raw, max } = calcCategoryPercent(cat.id, st);
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Category ${cat.n} summary</h1>
+          <div class="muted">${cat.title}</div>
+        </div>
+        <span class="pill">Summary</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="grid2">
+        <div class="callout info">
+          <b>Category impact (placeholder):</b><br/>
+          <div style="font-size:28px; font-weight:800; margin-top:6px;">${percent}%</div>
+          <div class="small muted">Raw ${raw} / ${max}</div>
+        </div>
+        <div class="callout warning">
+          <b>General feedback (placeholder):</b><br/>
+          <div class="small" style="margin-top:6px;">
+            This feedback will be replaced with your real interpretation rules later.
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="continueBtn" type="button">Continue</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    // go back to last subcategory of this category
+    const subs = SUBCATEGORIES[cat.id] || [];
+    saveState({ screen: "assess", currentSubIndex: Math.max(0, subs.length - 1) });
+    render();
+  });
+
+  document.getElementById("continueBtn").addEventListener("click", () => {
+    // Save category score into vector (array)
+    const st2 = loadState();
+    const existing = st2.categoryScores.filter(x => x.catId !== cat.id);
+    const nextScores = [...existing, { catId: cat.id, percent, raw, max }];
+
+    // Move to next selected category OR checkin gate
+    const nextIdx = findNextSelectedCatIndex(st2.currentCatIndex, st2);
+    if(nextIdx === -1){
+      saveState({ categoryScores: nextScores, screen: "checkin" });
+      return render();
+    }
+
+    saveState({
+      categoryScores: nextScores,
+      currentCatIndex: nextIdx,
+      currentSubIndex: 0,
+      screen: "assess"
+    });
+    render();
+  });
+}
+
+/* ---------- 4) Check-in gate + age 18–23 questionnaire ---------- */
+function renderCheckin(){
+  const st = loadState();
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Check-in before final results</h1>
+          <div class="muted">Step 4 of 5</div>
+        </div>
+        <span class="pill">Safety</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="callout warning">
+        <b>If you feel in crisis or at risk of self-harm or harming others:</b><br/>
+        Call 911 (U.S.) or your local emergency number.<br/>
+        U.S. crisis support: call or text <b>988</b>.
+      </div>
+
+      <div class="callout info" style="margin-top:12px;">
+        If this assessment felt intense, you may benefit from running it a second time later,
+        when you’re in a steadier place, to compare how your ratings change.
+      </div>
+
+      <div class="hr"></div>
+
+      <p class="p muted">
+        Brief questionnaire (age 18–23) — placeholder signals you asked to store:
+      </p>
+
+      ${renderLikertRow("intrusive", "Intrusive trauma signs (18–23)")}
+      ${renderLikertRow("avoidance", "Avoidance/numbing (18–23)")}
+      ${renderLikertRow("hyperarousal", "Hyperarousal / vigilance (18–23)")}
+      ${renderLikertRow("depression", "Depression signs (18–23)")}
+      ${renderLikertRow("anxiety", "Anxiety signs (18–23)")}
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="toFinalBtn" type="button">View final report</button>
+      </div>
+    </section>
+  `;
+
+  function renderLikertRow(key, label){
+    const v = st.age1823[key];
+    const val = (typeof v === "number") ? v : 0;
+    return `
+      <div class="callout" style="margin-top:10px;">
+        <div class="row" style="align-items:center;">
+          <div><b>${label}</b></div>
+          <div class="pill" id="pill_${key}">${val}</div>
+        </div>
+        <input id="rng_${key}" type="range" min="0" max="4" step="1" value="${val}" />
+        <div class="small muted">0 = none • 1 = mild • 2 = moderate • 3 = high • 4 = extreme</div>
+      </div>
+    `;
+  }
+
+  // Wire sliders
+  ["intrusive","avoidance","hyperarousal","depression","anxiety"].forEach(k => {
+    const pill = document.getElementById(`pill_${k}`);
+    const rng = document.getElementById(`rng_${k}`);
+    rng.addEventListener("input", () => { pill.textContent = rng.value; });
+  });
+
+  function persist(){
+    const next = { ...st.age1823 };
+    ["intrusive","avoidance","hyperarousal","depression","anxiety"].forEach(k => {
+      next[k] = Number(document.getElementById(`rng_${k}`).value);
+    });
+    saveState({ age1823: next });
+  }
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    // back to last category summary
+    // (simple: go to catSummary of current cat index)
+    // if currentCatIndex invalid, go to choice
+    persist();
+    const st2 = loadState();
+    if(typeof st2.currentCatIndex === "number"){
+      saveState({ screen: "catSummary" });
+      return render();
+    }
+    saveState({ screen: "choice" });
+    render();
+  });
+
+  document.getElementById("toFinalBtn").addEventListener("click", () => {
+    persist();
+    saveState({ screen: "final" });
+    render();
+  });
+}
+
+/* ---------- 5) Final report ---------- */
+function renderFinal(){
+  const st = loadState();
+
+  // Ensure categoryScores includes all selected cats (in case user refreshes mid-flow)
+  const selectedIds = getSelectedCatIds(st);
+  const scoreMap = Object.fromEntries((st.categoryScores || []).map(x => [x.catId, x]));
+  const rows = selectedIds.map(catId => {
+    const cat = CATEGORIES.find(c => c.id === catId);
+    const computed = calcCategoryPercent(catId, st);
+    const best = scoreMap[catId] || { catId, ...computed };
+    return { cat, ...best };
+  });
+
+  // Total score: simple average of category percents (placeholder)
+  const total = rows.length ? Math.round(rows.reduce((a,r) => a + (r.percent || 0), 0) / rows.length) : 0;
+
+  const listHtml = rows.map(r => `
+    <div class="callout" style="margin-top:10px;">
+      <div class="row">
+        <div><b>${r.cat.n}. ${r.cat.title}</b></div>
+        <div class="pill">${r.percent}%</div>
+      </div>
+      <div class="small muted">Raw ${r.raw} / ${r.max}</div>
+    </div>
+  `).join("");
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Final impact report</h1>
+          <div class="muted">Step 5 of 5</div>
+        </div>
+        <span class="pill">Report</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="grid2">
+        <div class="callout info">
+          <b>Total impact score (placeholder):</b>
+          <div style="font-size:34px; font-weight:900; margin-top:6px;">${total}%</div>
+          <div class="small muted">Average of category percentages (temporary)</div>
+        </div>
+        <div class="callout warning">
+          <b>Important:</b>
+          <div class="small" style="margin-top:6px;">
+            This is not a diagnostic tool. “Lower than average” does not mean “fine.”
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2 style="margin:0; font-size:16px;">Category scores</h2>
+      ${listHtml || `<div class="muted">No categories selected.</div>`}
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn secondary" id="exportBtn" type="button">Export data (JSON)</button>
+        <button class="btn primary" id="emailBtn" type="button">Send to email (mailto)</button>
+      </div>
+
+      <div class="small muted" style="margin-top:10px;">
+        Note: A static HTML page cannot truly “send email” automatically without a server.
+        “Send to email” uses a mailto draft (you click Send).
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    saveState({ screen: "checkin" });
+    render();
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const payload = buildPayloadForExport();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aces_results.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("emailBtn").addEventListener("click", () => {
+    const payload = buildPayloadForExport();
+
+    // WARNING: mailto body has length limits in many browsers.
+    // This is a starter approach; later we can send a short summary + attach JSON manually.
+    const email = "you@example.com"; // TODO: change
+    const subj = encodeURIComponent("Extended ACES assessment results");
+    const body = encodeURIComponent(
+      "Results JSON (may be truncated by email client):\n\n" + JSON.stringify(payload, null, 2)
+    );
+    window.location.href = `mailto:${email}?subject=${subj}&body=${body}`;
+  });
+
+  function buildPayloadForExport(){
+    // "Vectors" requested: arrays of objects
+    const st2 = loadState();
+
+    const selectedCats = getSelectedCatIds(st2);
+    const categoriesVector = selectedCats.map(catId => {
+      const cat = CATEGORIES.find(c => c.id === catId);
+      const { percent, raw, max } = calcCategoryPercent(catId, st2);
+      return { catId, catN: cat?.n, title: cat?.title, percent, raw, max };
+    });
+
+    const subcategoryVector = [];
+    selectedCats.forEach(catId => {
+      const subs = SUBCATEGORIES[catId] || [];
+      subs.forEach(s => {
+        subcategoryVector.push({
+          catId,
+          subId: s.id,
+          subTitle: s.title,
+          score: (typeof st2.subScores[s.id] === "number") ? st2.subScores[s.id] : 0
+        });
+      });
+    });
+
+    return {
+      version: "v01",
+      timestamp: new Date().toISOString(),
+      categoriesVector,
+      subcategoryVector,
+      age1823Vector: [
+        { key: "intrusive", score: st2.age1823.intrusive ?? 0 },
+        { key: "avoidance", score: st2.age1823.avoidance ?? 0 },
+        { key: "hyperarousal", score: st2.age1823.hyperarousal ?? 0 },
+        { key: "depression", score: st2.age1823.depression ?? 0 },
+        { key: "anxiety", score: st2.age1823.anxiety ?? 0 },
+      ],
+    };
+  }
+}
+
+/* ---------- Uncheck modal ---------- */
 function showUncheckModal(cat){
   el.uncheckDetail.textContent = `Category ${cat.n}: ${cat.title}`;
   el.uncheckBackdrop.classList.remove("hidden");
   el.uncheckBackdrop.setAttribute("aria-hidden", "false");
 }
-
 function hideUncheckModal(){
   el.uncheckBackdrop.classList.add("hidden");
   el.uncheckBackdrop.setAttribute("aria-hidden", "true");
   pendingUncheck = null;
 }
 
-/* --------- Top buttons --------- */
+/* ---------- Top buttons ---------- */
 el.btnHome.addEventListener("click", () => {
-  // On a one-page app, "Home" just re-renders.
-  renderMain();
+  // Home goes to intro
+  saveState({ screen: "intro" });
+  render();
 });
 
 el.btnRestart.addEventListener("click", () => {
-  const ok = confirm("This will clear local selections and restart. Continue?");
+  const ok = confirm("This will clear local progress and restart. Continue?");
   if(!ok) return;
   hardReset();
-  renderMain();
-  showDisclaimerIfNeeded();
+  // disclaimer will show again automatically
+  window.__disclaimerOk = false;
+  saveState(defaultState());
+  render();
+  showDisclaimerEveryTime();
 });
 
-/* --------- Disclaimer wiring --------- */
+/* ---------- Disclaimer wiring (session-only) ---------- */
+window.__disclaimerOk = false;
+
 el.disclaimerAgree.addEventListener("change", () => {
   el.disclaimerAccept.disabled = !el.disclaimerAgree.checked;
 });
 
 el.disclaimerAccept.addEventListener("click", () => {
-  saveState({ disclaimerAccepted: true });
+  window.__disclaimerOk = true;
   hideDisclaimer();
+  render(); // re-render intro so Begin enables
 });
 
 el.disclaimerDecline.addEventListener("click", () => {
-  // Minimal exit: show a simple card
   el.routeView.innerHTML = `
     <section class="card">
       <h1 class="h1">Exit</h1>
@@ -476,31 +1193,26 @@ el.disclaimerDecline.addEventListener("click", () => {
   `;
 });
 
-/* --------- Uncheck modal wiring --------- */
+/* ---------- Uncheck modal wiring ---------- */
 el.uncheckKeep.addEventListener("click", () => {
-  if(pendingUncheck){
-    const st = loadState();
-    const nextSel = { ...st.selectedCategories, [pendingUncheck.catId]: true };
-    saveState({ selectedCategories: nextSel });
-    if(pendingUncheck.checkboxEl) pendingUncheck.checkboxEl.checked = true;
-  }
+  if(pendingUncheck?.checkboxEl) pendingUncheck.checkboxEl.checked = true;
   hideUncheckModal();
 });
 
 el.uncheckRemove.addEventListener("click", () => {
   if(pendingUncheck){
     const st = loadState();
-    const nextSel = { ...st.selectedCategories, [pendingUncheck.catId]: false };
-    saveState({ selectedCategories: nextSel });
+    saveState({ selectedCategories: { ...st.selectedCategories, [pendingUncheck.catId]: false } });
     if(pendingUncheck.checkboxEl) pendingUncheck.checkboxEl.checked = false;
   }
   hideUncheckModal();
 });
 
-/* --------- Init --------- */
+/* ---------- Init ---------- */
 window.addEventListener("DOMContentLoaded", () => {
-  renderMain();
-  showDisclaimerIfNeeded();
+  render();
+  // MUST show disclaimer on every refresh
+  showDisclaimerEveryTime();
 });
 </script>
 </body>
