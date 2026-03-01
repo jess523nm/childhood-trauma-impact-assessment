@@ -282,7 +282,7 @@ label.inline{ display:flex; gap:10px; align-items:flex-start; }
    Flow:
    1) Intro (Disclaimer modal pops up EVERY refresh)
    2) Choice (select categories to complete)
-   3) Assessment (subcategories in order; category summary % + feedback)
+   3) Assessment (intro, subcategories in order; category summary % + feedback)
    4) Check-in gate + 18–23 questionnaire
    5) Final report (total + category scores)
 
@@ -364,6 +364,47 @@ const SUBCATEGORIES = {
   ],
 };
 
+// =========================
+// Scoring configuration
+// =========================
+
+// Tier ranges for percent scoring, per subcategory
+// Tier 0 is always a single-value band at 0.
+// Add ranges subcategory-by-subcategory as you build them.
+const TIER_RANGES = {
+  // Example starter: cat1_sub1A (replace later with your final numbers if needed)
+  cat1_sub1A: [
+    { tier: 0, min: 0,  max: 0  },
+    { tier: 1, min: 5,  max: 8  },
+    { tier: 2, min: 9,  max: 15 },
+    { tier: 3, min: 16, max: 28 },
+    { tier: 4, min: 29, max: 45 },
+    { tier: 5, min: 46, max: 60 },
+    { tier: 6, min: 61, max: 75 },
+    { tier: 7, min: 76, max: 85 },
+  ],
+};
+
+// Category 2 uses STAR scoring (not tiers)
+const STAR_SUBS = new Set([
+  "cat2_subA","cat2_subB","cat2_subC","cat2_subD","cat2_subE"
+]);
+
+// Special-case: 1J uses Likert (not tiers)
+const LIKERT_SUBS = new Set([
+  "cat1_sub1J"
+]);
+
+function midpoint(min, max){
+  return Math.round((min + max) / 2);
+}
+
+function scoreModeForSub(subId){
+  if(STAR_SUBS.has(subId)) return "star";
+  if(LIKERT_SUBS.has(subId)) return "likert";
+  return "tier";
+}
+
 /* ---------- State ---------- */
 function defaultState(){
   return {
@@ -372,8 +413,15 @@ function defaultState(){
     // assessment progress pointers
     currentCatIndex: 0,
     currentSubIndex: 0,
-    // subcategory scores: { [subId]: number }
-    subScores: {},
+
+    // subcategory scores
+    subScores: {},      // legacy placeholder, can be removed later
+
+    subPercents: {},    // tier percent 0–100
+    subTiers: {},       // tier 0–7
+
+    subStars: {},       // star score 0–4
+    subLikerts: {},     // likert score 0–4
     // category summary cache: [{catId, percent, raw, max}]
     categoryScores: [],
     // 18–23 check-in questionnaire
@@ -394,6 +442,13 @@ function loadState(){
       ...parsed,
       selectedCategories: { ...base.selectedCategories, ...(parsed.selectedCategories || {}) },
       subScores: parsed.subScores || {},
+
+      subPercents: parsed.subPercents || {},
+      subTiers: parsed.subTiers || {},
+
+      subStars: parsed.subStars || {},
+      subLikerts: parsed.subLikerts || {},
+
       categoryScores: parsed.categoryScores || [],
       age1823: { ...base.age1823, ...(parsed.age1823 || {}) }
     };
@@ -472,16 +527,33 @@ function calcCategoryPercent(catId, st){
   const subs = SUBCATEGORIES[catId] || [];
   if(subs.length === 0) return { percent: 0, raw: 0, max: 0 };
 
-  const maxPerSub = 4; // slider 0–4 placeholder
-  const max = subs.length * maxPerSub;
-
   let raw = 0;
+  let max = 0;
+
   subs.forEach(s => {
-    const v = st.subScores[s.id];
+    const mode = scoreModeForSub(s.id);
+
+    if(mode === "tier"){
+      const v = st.subPercents?.[s.id];
+      raw += (typeof v === "number" ? v : 0);
+      max += 100;
+      return;
+    }
+
+    if(mode === "star"){
+      const v = st.subStars?.[s.id];
+      raw += (typeof v === "number" ? v : 0);
+      max += 4;
+      return;
+    }
+
+    // likert
+    const v = st.subLikerts?.[s.id];
     raw += (typeof v === "number" ? v : 0);
+    max += 4;
   });
 
-  const percent = Math.round((raw / max) * 100);
+  const percent = max ? Math.round((raw / max) * 100) : 0;
   return { percent, raw, max };
 }
 
@@ -604,7 +676,7 @@ function renderChoice(){
 
         <div class="hidden" id="subs_${cat.id}" style="margin-left:34px; margin-top:10px;">
           <div class="callout info">
-            <b>Rule:</b> If you complete this category, you will complete <b>all</b> subcategories in it (no picking and choosing).
+            <b>Note: </b> If you choose to complete this category, you will need to complete all subcategories.
           </div>
           ${subsHtml}
         </div>
@@ -699,11 +771,103 @@ function renderChoice(){
       currentCatIndex: idx,
       currentSubIndex: 0,
       categoryScores: [],
-      subScores: {},
+
+      subScores: {},     // legacy placeholder
+      subPercents: {},
+      subTiers: {},
+      subStars: {},
+      subLikerts: {},
+
       age1823: defaultState().age1823
     });
     render();
   });
+}
+
+function renderScoringBlock(sub, st){
+  const mode = scoreModeForSub(sub.id);
+
+  if(mode === "tier"){
+    const ranges = TIER_RANGES[sub.id];
+
+    if(!ranges || !ranges.length){
+      return `
+        <div class="callout warning">
+          <b>Tier scoring not configured yet for ${sub.title}.</b>
+          <div class="small" style="margin-top:6px;">
+            Add TIER_RANGES["${sub.id}"] before scoring this subcategory.
+          </div>
+        </div>
+      `;
+    }
+
+    const savedTier = (typeof st.subTiers?.[sub.id] === "number") ? st.subTiers[sub.id] : 0;
+    const tierObj = ranges.find(r => r.tier === savedTier) || ranges[0];
+
+    const savedPct = (typeof st.subPercents?.[sub.id] === "number") ? st.subPercents[sub.id] : null;
+    const startPct = (savedPct !== null) ? savedPct : midpoint(tierObj.min, tierObj.max);
+
+    const tierOptions = ranges.map(r => {
+      const label = (r.min === r.max) ? `${r.tier} (${r.min}%)` : `${r.tier} (${r.min}-${r.max}%)`;
+      const sel = (r.tier === savedTier) ? "selected" : "";
+      return `<option value="${r.tier}" ${sel}>Tier ${label}</option>`;
+    }).join("");
+
+    const rangeLabel = (tierObj.min === tierObj.max) ? `(${tierObj.min}%)` : `(${tierObj.min}-${tierObj.max}%)`;
+
+    return `
+      <p class="p muted">
+        Choose your tier, then fine-tune the percent within that tier range.
+      </p>
+
+      <div class="callout" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="row" style="align-items:center;">
+          <div><b>Tier:</b></div>
+          <select id="tierSelect" class="btn secondary" style="padding:10px 12px;">
+            ${tierOptions}
+          </select>
+        </div>
+
+        <div class="row" style="align-items:center;">
+          <div><b>Percent score:</b> <span class="muted" id="pctRangeLabel">${rangeLabel}</span></div>
+          <div class="pill" id="pctPill">${startPct}</div>
+        </div>
+
+        <input id="pctSlider" type="range" min="${tierObj.min}" max="${tierObj.max}" step="1" value="${startPct}" />
+        <div class="small muted">Tier 0 always stays at 0.</div>
+      </div>
+    `;
+  }
+
+  if(mode === "star"){
+    const saved = (typeof st.subStars?.[sub.id] === "number") ? st.subStars[sub.id] : 0;
+    return `
+      <p class="p muted">Star scoring (temporary). 0-4.</p>
+
+      <div class="callout" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="row" style="align-items:center;">
+          <div><b>Stars:</b> <span class="muted">(0-4)</span></div>
+          <div class="pill" id="starPill">${saved}</div>
+        </div>
+        <input id="starSlider" type="range" min="0" max="4" step="1" value="${saved}" />
+      </div>
+    `;
+  }
+
+  // likert
+  const saved = (typeof st.subLikerts?.[sub.id] === "number") ? st.subLikerts[sub.id] : 0;
+  return `
+    <p class="p muted">Likert scoring (temporary). 0-4.</p>
+
+    <div class="callout" style="display:flex; flex-direction:column; gap:10px;">
+      <div class="row" style="align-items:center;">
+        <div><b>Impact:</b> <span class="muted">(0-4)</span></div>
+        <div class="pill" id="likertPill">${saved}</div>
+      </div>
+      <input id="likertSlider" type="range" min="0" max="4" step="1" value="${saved}" />
+      <div class="small muted">0 = none, 4 = extreme</div>
+    </div>
+  `;
 }
 
 /* ---------- 3) Assessment screen (subcategory-by-subcategory) ---------- */
@@ -730,8 +894,6 @@ function renderAssessment(){
     return render();
   }
 
-  const currentVal = (typeof st.subScores[sub.id] === "number") ? st.subScores[sub.id] : 0;
-
   el.routeView.innerHTML = `
     <section class="card">
       <div class="row">
@@ -751,21 +913,7 @@ function renderAssessment(){
 
       <div class="hr"></div>
 
-      <p class="p muted">
-        Placeholder scoring (temporary): choose an impact level for this subcategory.
-        (We’ll replace this with your full 10–20 Likert items later.)
-      </p>
-
-      <div class="callout" style="display:flex; flex-direction:column; gap:10px;">
-        <div class="row" style="align-items:center;">
-          <div><b>Impact score:</b> <span class="muted">(0–4)</span></div>
-          <div class="pill" id="scorePill">${currentVal}</div>
-        </div>
-        <input id="impactSlider" type="range" min="0" max="4" step="1" value="${currentVal}" />
-        <div class="small muted">
-          0 = none • 1 = mild • 2 = moderate • 3 = high • 4 = extreme
-        </div>
-      </div>
+      ${renderScoringBlock(sub, st)}
 
       <div class="hr"></div>
 
@@ -776,18 +924,88 @@ function renderAssessment(){
     </section>
   `;
 
-  const pill = document.getElementById("scorePill");
-  const slider = document.getElementById("impactSlider");
+    const mode = scoreModeForSub(sub.id);
 
-  slider.addEventListener("input", () => {
-    pill.textContent = slider.value;
-  });
+    // Tier elements
+    const tierSelect = document.getElementById("tierSelect");
+    const pctSlider = document.getElementById("pctSlider");
+    const pctPill = document.getElementById("pctPill");
+    const pctRangeLabel = document.getElementById("pctRangeLabel");
 
-  function persistCurrent(){
-    const st2 = loadState();
-    const v = Number(slider.value);
-    saveState({ subScores: { ...st2.subScores, [sub.id]: v } });
-  }
+    // Star elements
+    const starSlider = document.getElementById("starSlider");
+    const starPill = document.getElementById("starPill");
+
+    // Likert elements
+    const likertSlider = document.getElementById("likertSlider");
+    const likertPill = document.getElementById("likertPill");
+
+    if(mode === "tier" && pctSlider && pctPill){
+      pctSlider.addEventListener("input", () => {
+        pctPill.textContent = pctSlider.value;
+      });
+
+      if(tierSelect){
+        tierSelect.addEventListener("change", () => {
+          const ranges = TIER_RANGES[sub.id] || [];
+          const t = Number(tierSelect.value);
+          const tierObj = ranges.find(r => r.tier === t) || ranges[0];
+
+          pctSlider.min = String(tierObj.min);
+          pctSlider.max = String(tierObj.max);
+
+          const mid = midpoint(tierObj.min, tierObj.max);
+          pctSlider.value = String(mid);
+          pctPill.textContent = String(mid);
+
+          if(pctRangeLabel){
+            pctRangeLabel.textContent = (tierObj.min === tierObj.max)
+              ? `(${tierObj.min}%)`
+              : `(${tierObj.min}-${tierObj.max}%)`;
+          }
+        });
+      }
+    }
+
+    if(mode === "star" && starSlider && starPill){
+      starSlider.addEventListener("input", () => {
+        starPill.textContent = starSlider.value;
+      });
+    }
+
+    if(mode === "likert" && likertSlider && likertPill){
+      likertSlider.addEventListener("input", () => {
+        likertPill.textContent = likertSlider.value;
+      });
+    }
+
+    function persistCurrent(){
+      const st2 = loadState();
+
+      if(mode === "tier"){
+        // If tiers not configured yet, do not persist anything
+        if(!TIER_RANGES[sub.id] || !TIER_RANGES[sub.id].length) return;
+
+        const t = tierSelect ? Number(tierSelect.value) : 0;
+        const p = pctSlider ? Number(pctSlider.value) : 0;
+
+        saveState({
+          subTiers: { ...(st2.subTiers || {}), [sub.id]: t },
+          subPercents: { ...(st2.subPercents || {}), [sub.id]: p },
+        });
+        return;
+      }
+
+      if(mode === "star"){
+        const v = starSlider ? Number(starSlider.value) : 0;
+        saveState({ subStars: { ...(st2.subStars || {}), [sub.id]: v } });
+        return;
+      }
+
+      // likert
+      const v = likertSlider ? Number(likertSlider.value) : 0;
+      saveState({ subLikerts: { ...(st2.subLikerts || {}), [sub.id]: v } });
+    }
 
   document.getElementById("backBtn").addEventListener("click", () => {
     persistCurrent();
@@ -900,6 +1118,21 @@ function renderCategorySummary(){
 function renderCheckin(){
   const st = loadState();
 
+    function renderLikertRow(key, label){
+    const v = st.age1823[key];
+    const val = (typeof v === "number") ? v : 0;
+    return `
+      <div class="callout" style="margin-top:10px;">
+        <div class="row" style="align-items:center;">
+          <div><b>${label}</b></div>
+          <div class="pill" id="pill_${key}">${val}</div>
+        </div>
+        <input id="rng_${key}" type="range" min="0" max="4" step="1" value="${val}" />
+        <div class="small muted">0 = none • 1 = mild • 2 = moderate • 3 = high • 4 = extreme</div>
+      </div>
+    `;
+  }
+
   el.routeView.innerHTML = `
     <section class="card">
       <div class="row">
@@ -943,21 +1176,6 @@ function renderCheckin(){
       </div>
     </section>
   `;
-
-  function renderLikertRow(key, label){
-    const v = st.age1823[key];
-    const val = (typeof v === "number") ? v : 0;
-    return `
-      <div class="callout" style="margin-top:10px;">
-        <div class="row" style="align-items:center;">
-          <div><b>${label}</b></div>
-          <div class="pill" id="pill_${key}">${val}</div>
-        </div>
-        <input id="rng_${key}" type="range" min="0" max="4" step="1" value="${val}" />
-        <div class="small muted">0 = none • 1 = mild • 2 = moderate • 3 = high • 4 = extreme</div>
-      </div>
-    `;
-  }
 
   // Wire sliders
   ["intrusive","avoidance","hyperarousal","depression","anxiety"].forEach(k => {
@@ -1116,11 +1334,19 @@ function renderFinal(){
     selectedCats.forEach(catId => {
       const subs = SUBCATEGORIES[catId] || [];
       subs.forEach(s => {
+        const mode = scoreModeForSub(s.id);
+
         subcategoryVector.push({
           catId,
           subId: s.id,
           subTitle: s.title,
-          score: (typeof st2.subScores[s.id] === "number") ? st2.subScores[s.id] : 0
+          mode,
+
+          tier: (typeof st2.subTiers?.[s.id] === "number") ? st2.subTiers[s.id] : null,
+          percent: (typeof st2.subPercents?.[s.id] === "number") ? st2.subPercents[s.id] : null,
+
+          stars: (typeof st2.subStars?.[s.id] === "number") ? st2.subStars[s.id] : null,
+          likert: (typeof st2.subLikerts?.[s.id] === "number") ? st2.subLikerts[s.id] : null
         });
       });
     });
