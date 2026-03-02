@@ -310,6 +310,60 @@ const CATEGORIES = [
   { id: "cat10", n: 10, title: "Caregiver substance misuse", note: "Alcohol or drug misuse creating instability, danger, or chronic stress." },
 ];
 
+// =========================
+// Category intro text (HTML) shown before subcategories begin
+// =========================
+const CATEGORY_INTRO_HTML = {
+  cat1: `
+    <div class="callout info" style="margin-top:12px;">
+      <div style="font-weight:900; margin-bottom:6px;">
+        Category 1: Emotional and Psychological Abuse
+        <span class="pill" style="margin-left:8px;">Weight: 16</span>
+      </div>
+
+      <div class="small muted" style="margin-top:6px;"><b>Overview:</b></div>
+
+      <p class="p" style="margin-top:8px;">
+        Chronic emotional abuse is strongly associated with adult depression, anxiety disorders, suicidality, complex trauma symptoms, attachment disturbances, and impaired self-concept.
+        In multiple longitudinal studies, its predictive power rivals or exceeds physical abuse, particularly when it is persistent and identity-level.
+      </p>
+
+      <p class="p">
+        Unlike physical harm, emotional abuse reshapes internal development. It targets core psychological systems such as safety, identity, agency, attachment, and epistemic trust.
+        When repeated, it can alter stress-response patterns, increase hypervigilance, and distort self-perception in ways that persist into adulthood.
+      </p>
+
+      <div class="small muted" style="margin-top:10px;"><b>This category includes patterns such as:</b></div>
+      <ul style="margin:8px 0 0 18px;">
+        <li>Verbal aggression and chronic degradation</li>
+        <li>Shame-based humiliation and scapegoating</li>
+        <li>Threats, intimidation, or emotional terrorizing</li>
+        <li>Gaslighting and systematic reality distortion</li>
+        <li>Conditional love used as behavioral control</li>
+        <li>Role reversal and emotional parentification</li>
+        <li>Exploitation or loyalty coercion</li>
+        <li>Excessive control or autonomy suppression</li>
+        <li>Social isolation or relational sabotage</li>
+      </ul>
+
+      <p class="p" style="margin-top:10px;">
+        Emotional and psychological abuse often operate through repetition and subtlety rather than overt crisis.
+        They may be normalized within the family system, framed as discipline, humor, protection, or love.
+        Because they leave no visible evidence and frequently include minimization, survivors are often taught to doubt their own perception of harm.
+      </p>
+
+      <p class="p">
+        The core injury in this category is not just distress; it is the shaping of identity.
+        It influences how a person views their worth, safety, autonomy, and trust in their own mind.
+      </p>
+
+      <p class="p">
+        For many adults, this is the most difficult category to name precisely because its effects are internal and cumulative rather than visibly dramatic.
+      </p>
+    </div>
+  `
+};
+
 const SUBCATEGORIES = {
   cat1: [
     { id: "cat1_sub1A", title: "1A: Verbal aggression", blurb: "Harsh tone, yelling, verbal hostility; escalation from dysregulated snapping to chronic verbal attack." },
@@ -408,7 +462,7 @@ function scoreModeForSub(subId){
 /* ---------- State ---------- */
 function defaultState(){
   return {
-    screen: "intro", // intro | choice | assess | catSummary | checkin | final
+    screen: "intro", // intro | choice | catIntro | assess | catSummary | checkin | final
     selectedCategories: Object.fromEntries(CATEGORIES.map(c => [c.id, true])),
     // assessment progress pointers
     currentCatIndex: 0,
@@ -564,6 +618,7 @@ function render(){
   const st = loadState();
   if(st.screen === "intro") return renderIntro();
   if(st.screen === "choice") return renderChoice();
+  if(st.screen === "catIntro") return renderCategoryIntro();
   if(st.screen === "assess") return renderAssessment();
   if(st.screen === "catSummary") return renderCategorySummary();
   if(st.screen === "checkin") return renderCheckin();
@@ -767,7 +822,7 @@ function renderChoice(){
     // Reset progress pointers to first selected category
     const idx = firstSelectedCatIndex(st2);
     saveState({
-      screen: "assess",
+      screen: "catIntro",
       currentCatIndex: idx,
       currentSubIndex: 0,
       categoryScores: [],
@@ -868,6 +923,65 @@ function renderScoringBlock(sub, st){
       <div class="small muted">0 = none, 4 = extreme</div>
     </div>
   `;
+}
+
+/* ---------- 3) Category intro screen (shown before subcategories) ---------- */
+function renderCategoryIntro(){
+  const st = loadState();
+  const cat = CATEGORIES[st.currentCatIndex];
+
+  if(!cat || !st.selectedCategories[cat.id]){
+    // Jump to next selected if current is invalid
+    const nextIdx = findNextSelectedCatIndex(st.currentCatIndex, st);
+    if(nextIdx === -1){
+      saveState({ screen: "checkin" });
+      return render();
+    }
+    saveState({ currentCatIndex: nextIdx });
+    return render();
+  }
+
+  const introHtml = CATEGORY_INTRO_HTML[cat.id] || `
+    <div class="callout info" style="margin-top:12px;">
+      <b>No intro written yet for this category.</b>
+      <div class="small muted" style="margin-top:6px;">
+        You can add it in CATEGORY_INTRO_HTML.
+      </div>
+    </div>
+  `;
+
+  el.routeView.innerHTML = `
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1 class="h1">Category ${cat.n}: ${cat.title}</h1>
+          <div class="muted">Introduction</div>
+        </div>
+        <span class="pill">Intro</span>
+      </div>
+
+      <div class="hr"></div>
+
+      ${introHtml}
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn secondary" id="backBtn" type="button">Back</button>
+        <button class="btn primary" id="continueBtn" type="button">Continue</button>
+      </div>
+    </section>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    saveState({ screen: "choice" });
+    render();
+  });
+
+  document.getElementById("continueBtn").addEventListener("click", () => {
+    saveState({ screen: "assess", currentSubIndex: 0 });
+    render();
+  });
 }
 
 /* ---------- 3) Assessment screen (subcategory-by-subcategory) ---------- */
